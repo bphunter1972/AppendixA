@@ -1,0 +1,2 @@
+See https://github.com/advanced-uvm/hawkins, verif/vkits/cmn/cmn_csqr.sv.
+
