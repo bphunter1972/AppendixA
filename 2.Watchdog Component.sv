@@ -13,12 +13,14 @@
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
  *************************************************************************/
+
+`ifndef __GLOBAL_WATCHDOG_SV__
+   `define __GLOBAL_WATCHDOG_SV__
 
 // class: watchdog_c
 class watchdog_c extends uvm_component;
-   `uvm_component_utils_begin(global_watchdog_c)
+   `uvm_component_utils_begin(global_pkg::watchdog_c)
       `uvm_field_int(watchdog_time, UVM_COMPONENT | UVM_DEC)
    `uvm_component_utils_end
 
@@ -57,6 +59,7 @@ class watchdog_c extends uvm_component;
       if(watchdog_time == 0)
          return;
 
+      `cmn_info(("Waiting for watchdog timeout at %0dns...", watchdog_time))
       #(watchdog_time * 1ns);
 
       `cmn_err(("Watchdog Timeout! Objection report:"))
@@ -68,10 +71,12 @@ class watchdog_c extends uvm_component;
       if(current_phase == null) begin
          `cmn_fatal(("Exiting due to timeout, but could not identify phase responsible"))
       end else begin
-         uvm_domain::jump_all(uvm_check_phase::get());
+        uvm_domain::jump_all(uvm_extract_phase::get());
       end
    endtask : run_phase
    ////////////////////////////////////////////
+   // func: final_phase
+   // Issue a fatal error
    virtual function void final_phase(uvm_phase phase);
       if(timeout_occurred)
          `cmn_fatal(("Exiting due to watchdog timeout."))
@@ -101,3 +106,5 @@ class watchdog_c extends uvm_component;
       `cmn_info((str))
    endfunction : objector_report
 endclass : watchdog_c
+
+`endif // __GLOBAL_WATCHDOG_SV__
